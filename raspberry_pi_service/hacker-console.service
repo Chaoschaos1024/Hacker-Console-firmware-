@@ -1,0 +1,16 @@
+[Unit]
+Description=Hacker Console Data Sender
+After=network.target multi-user.target
+Wants=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/bin/hacker_console_sender.py
+Restart=always
+RestartSec=10
+StandardOutput=append:/var/log/hacker_console.log
+StandardError=append:/var/log/hacker_console_error.log
+User=root
+
+[Install]
+WantedBy=multi-user.target
