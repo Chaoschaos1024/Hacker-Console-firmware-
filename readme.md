@@ -167,6 +167,7 @@
 git clone https://github.com/Chaoschaos1024/Hacker-Console-firmware-.git && cd Hacker-Console-firmware-/raspberry_pi_service && sudo bash install.sh
 ```
 - 更新固件，
+设备左侧有两个小孔，设备开机的情况下，按住上面小孔的按键，按一下下面的小孔的按键，之后树莓派会显示有U盘插入，将release中的firmware.uf2文件放进U盘中，完成更新。
 
 ---
 
@@ -174,41 +175,19 @@ git clone https://github.com/Chaoschaos1024/Hacker-Console-firmware-.git && cd H
 
 | 组件     | 工具链              | 说明             |
 | :------- | :------------------ | :--------------- |
-| 主控 MCU | STM32CubeIDE / Keil | 根据具体型号选择 |
-| 键盘 MCU | STM32CubeIDE / Keil | HID 协议实现     |
+| 主控 MCU | platformIO | 根据具体型号选择 |
+| 键盘 MCU | Arduino| 键盘扫描     |
 | 树莓派   | 任意 Linux 环境     | 状态上报脚本     |
 
----
-
-## 📸 界面预览
-
-```
-╔═══════════════════════════════════════════╗
-║   HACKER CONSOLE · SYSTEM STATUS          ║
-╠═══════════════════════════════════════════╣
-║                                           ║
-║   🔥 CPU      [████████░░░░░░░░] 62%     ║
-║   🌡️ TEMP     [███████░░░░░░░░░] 47°C    ║
-║   💾 MEM      [██████░░░░░░░░░░] 31%     ║
-║   💿 DISK     [████░░░░░░░░░░░░] 18%     ║
-║   📶 NET      [████████████████] 82%     ║
-║   🔋 BATTERY  [████████████████] 85%     ║
-║                                           ║
-║   ◄────────  Page 1/5  ────────►         ║
-║                                           ║
-║   [UPDATE MODE]  [SETTINGS]  [ABOUT]    ║
-╚═══════════════════════════════════════════╝
-```
 
 ---
 
 ## 🎯 下一步计划
 
-- [ ] WiFi 管理界面
-- [ ] 蓝牙外设支持
-- [ ] 主题切换功能
-- [ ] 更多传感器扩展
-- [ ] OTA 无线更新
+- [ ] 添加更多设置界面
+- [ ] 增加其他副屏UI
+- [ ] 为WS2812添加更多功能
+- [ ] 更新详细文档
 
 ---
 
