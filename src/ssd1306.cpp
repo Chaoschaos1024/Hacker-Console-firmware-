@@ -947,18 +947,45 @@ int SECONDARY_DISPLAY::show_keyboard_information()
     y = y + 2;
     show_defauit_text("TYPE:");
     y = y + 3;
-    if (system_status.keyboard_type & old_keyboard)
+    if (system_status.keyboard_slot_1 & old_keyboard)
     {
-        show_defauit_text("OLD");
+        show_defauit_text("1:OLD");
     }
-    if ((system_status.keyboard_type & new_keyboard_old_program))
+    if ((system_status.keyboard_slot_1 & new_keyboard_old_program))
     {
-        show_defauit_text("NEW");
+        show_defauit_text("1:NEW");
     }
-    if (system_status.keyboard_type & new_keyboard_new_program)
+    if (system_status.keyboard_slot_1 & new_keyboard_new_program)
     {
-        show_defauit_text("NEW.");
+        show_defauit_text("1:NEW.");
     }
+
+    if (system_status.keyboard_slot_2 & old_keyboard)
+    {
+        show_defauit_text("2:OLD");
+    }
+    if ((system_status.keyboard_slot_2 & new_keyboard_old_program))
+    {
+        show_defauit_text("2:NEW");
+    }
+    if (system_status.keyboard_slot_2 & new_keyboard_new_program)
+    {
+        show_defauit_text("2:NEW.");
+    }
+
+    if (system_status.keyboard_slot_3 & old_keyboard)
+    {
+        show_defauit_text("3:OLD");
+    }
+    if ((system_status.keyboard_slot_3 & new_keyboard_old_program))
+    {
+        show_defauit_text("3:NEW");
+    }
+    if (system_status.keyboard_slot_3 & new_keyboard_new_program)
+    {
+        show_defauit_text("3:NEW.");
+    }
+
     y = y + 2;
     line(1);
     y = y + 2;
@@ -966,14 +993,31 @@ int SECONDARY_DISPLAY::show_keyboard_information()
     y = y + 2;
     show_defauit_text("KEY :");
     y = y + 3;
-    if (system_status.keyboard_type & old_keyboard)
+    if (system_status.keyboard_slot_1 & old_keyboard)
     {
         show_defauit_text(old_key_map[system_status.last_key_index]);
     }
-    if (system_status.keyboard_type & new_keyboard_new_program || system_status.keyboard_type & new_keyboard_old_program)
+    if (system_status.keyboard_slot_1 & new_keyboard_new_program || system_status.keyboard_slot_1 & new_keyboard_old_program)
     {
         show_defauit_text(new_key_map[system_status.last_key_index]);
     }
+    if (system_status.keyboard_slot_2 & old_keyboard)
+    {
+        show_defauit_text(old_key_map[system_status.last_key_index]);
+    }
+    if (system_status.keyboard_slot_2 & new_keyboard_new_program || system_status.keyboard_slot_2 & new_keyboard_old_program)
+    {
+        show_defauit_text(new_key_map[system_status.last_key_index]);
+    }
+    if (system_status.keyboard_slot_3 & old_keyboard)
+    {
+        show_defauit_text(old_key_map[system_status.last_key_index]);
+    }
+    if (system_status.keyboard_slot_3 & new_keyboard_new_program || system_status.keyboard_slot_3 & new_keyboard_old_program)
+    {
+        show_defauit_text(new_key_map[system_status.last_key_index]);
+    }
+
 #if debug
     show_defauit_text(system_status.last_key_value);
 #endif

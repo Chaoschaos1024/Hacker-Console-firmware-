@@ -68,7 +68,9 @@ typedef struct
     int touch_x;
     int touch_y;
 
-    uint8_t keyboard_type;
+    uint8_t keyboard_slot_1;
+    uint8_t keyboard_slot_2;
+    uint8_t keyboard_slot_3;
     bool is_usb_ready_4_communication;
     bool capslock_status;
     bool shift_status;

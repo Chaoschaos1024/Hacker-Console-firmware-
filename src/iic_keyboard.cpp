@@ -193,6 +193,7 @@ uint8_t IIC_Keyboard::find_keyboard_type()
     keyboard_address_2_slot = 0;
     keyboard_address_3_slot = 0;
 
+
     bool device_detected = false;
     Wire1.beginTransmission(old_keyboard_iic_address);
     device_detected = !Wire1.endTransmission();
@@ -302,7 +303,9 @@ uint8_t IIC_Keyboard::find_keyboard_type()
     debug_serial.println("Keyboard type detection finished.");
     debug_serial.println("--------------------------------------------------");
 #endif
-
+    system_status.keyboard_slot_1 = keyboard_address_1_slot;
+    system_status.keyboard_slot_2 = keyboard_address_2_slot;
+    system_status.keyboard_slot_3 = keyboard_address_3_slot;
     return 0;
 }
 

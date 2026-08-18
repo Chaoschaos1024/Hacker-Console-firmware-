@@ -206,7 +206,9 @@ void Flash::init_default_status(System_Status &status)
     status.touch_x = 0;
     status.touch_y = 0;
 
-    status.keyboard_type = 0;
+    status.keyboard_slot_1 = 0;
+    status.keyboard_slot_2 = 0;
+    status.keyboard_slot_3 = 0;
     status.last_key_value = 0;
 
     status.ssd1306_status = 0;

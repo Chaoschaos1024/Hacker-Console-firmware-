@@ -55,7 +55,9 @@ bool system_status_setup()
     system_status.touch_x = 0;
     system_status.touch_y = 0;
 
-    system_status.keyboard_type = 0;
+    system_status.keyboard_slot_1 = 0;
+    system_status.keyboard_slot_2 = 0;
+    system_status.keyboard_slot_3 = 0;
     system_status.is_usb_ready_4_communication = 0;
     system_status.capslock_status = 0;
     system_status.shift_status = 0;
@@ -212,8 +214,12 @@ bool system_status_report()
     debug_serial.print(system_status.touch_y);
     debug_serial.println(")");
 
-    debug_serial.print("Keyboard Type: ");
-    debug_serial.println(system_status.keyboard_type);
+    debug_serial.print("Keyboard Slot 1: ");
+    debug_serial.println(system_status.keyboard_slot_1);
+    debug_serial.print("Keyboard Slot 2: ");
+    debug_serial.println(system_status.keyboard_slot_2);
+    debug_serial.print("Keyboard Slot 3: ");
+    debug_serial.println(system_status.keyboard_slot_3);
     debug_serial.print("Is USB ready for communication: ");
     debug_serial.println(system_status.is_usb_ready_4_communication);
     debug_serial.print("Caps Lock Status: ");
