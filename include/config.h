@@ -12,9 +12,9 @@
 
 #include <SoftwareSerial.h>
 
-#define software_version 6.00
+#define software_version 6.10
 #define softwareversion_major 6
-#define softeware_version_minor 0
+#define softeware_version_minor 10
 #define old_hardware_version 1
 #define new_hardware_version 2
 
