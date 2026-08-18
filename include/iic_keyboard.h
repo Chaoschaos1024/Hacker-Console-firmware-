@@ -40,14 +40,13 @@ class IIC_Keyboard
 {
 public:
     bool begin();
-    bool usb_set();
     bool is_usb_ready();
     uint8_t find_keyboard_type();
     uint8_t routine();
-    bool new_keyboard_new_program_flag = false;
-    bool new_keyboard_old_program_flag = false;
-    bool old_keyboard_flag = false;
-    uint8_t keyboard_type = 0;
+
+    uint8_t keyboard_address_1_slot = 0;
+    uint8_t keyboard_address_2_slot = 0;
+    uint8_t keyboard_address_3_slot = 0;
 
     bool capsLock_status = false;
     bool shift_status = false;

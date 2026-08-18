@@ -87,6 +87,18 @@ void setup()
   system_status_report();
   delay(5);
 #endif
+
+#if debug
+while(0)
+{
+  iic_keyboard.find_keyboard_type();
+  delay(1000);
+}
+#endif
+
+#if debug
+  debug_serial.println("-------------------------   setup end  -----------------------------");
+#endif
 }
 
 void loop()

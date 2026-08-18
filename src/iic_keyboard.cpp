@@ -173,17 +173,10 @@ Key new_keyboard_key[new_keyboard_key_count] =
 
 bool IIC_Keyboard::begin()
 {
-    usb_set();
     Keyboard.begin();
     delay(1);
     Mouse.begin();
     find_keyboard_type();
-    return true;
-}
-bool IIC_Keyboard::usb_set()
-{
-    // USB.setVIDPID(0xA5A5, 0xA5A5);
-    // USB.setManufacturer("Hacker Console");
     return true;
 }
 bool IIC_Keyboard::is_usb_ready()
@@ -193,168 +186,183 @@ bool IIC_Keyboard::is_usb_ready()
 }
 uint8_t IIC_Keyboard::find_keyboard_type()
 {
-    keyboard_type = 0;
+#if debug
+    debug_serial.println("Finding keyboard type...");
+#endif
+    keyboard_address_1_slot = 0;
+    keyboard_address_2_slot = 0;
+    keyboard_address_3_slot = 0;
+
     bool device_detected = false;
     Wire1.beginTransmission(old_keyboard_iic_address);
     device_detected = !Wire1.endTransmission();
     if (device_detected)
     {
         get_buffer(old_keyboard_iic_address);
-        if (iic_buffer[keyboard_iic_length - 1] != old_keyboard_crc)
+        if (iic_buffer[keyboard_iic_length - 1] == new_keyboard_crc)
         {
-            keyboard_type = keyboard_type & ~old_keyboard;
-            old_keyboard_flag = false;
+            keyboard_address_1_slot = new_keyboard_old_program;
 #if debug
-            debug_serial.println("Old keyboard CRC error");
+            debug_serial.println("New keyboard with old program detected at old keyboard address");
 #endif
         }
-        else
+        else if (iic_buffer[keyboard_iic_length - 1] == new_keyboard_with_new_program_crc)
         {
-            keyboard_type = keyboard_type | old_keyboard;
-            old_keyboard_flag = true;
+            keyboard_address_1_slot = new_keyboard_new_program;
 #if debug
-            debug_serial.println("Old keyboard detected");
+            debug_serial.println("New keyboard with new program detected at old keyboard address");
 #endif
         }
-    }
-    else
-    {
+        else if (iic_buffer[keyboard_iic_length - 1] == old_keyboard_crc)
+        {
+            keyboard_address_1_slot = old_keyboard;
 #if debug
-        debug_serial.println("No old keyboard detected");
+            debug_serial.println("Old keyboard detected at old keyboard address");
 #endif
+        }
     }
     Wire1.beginTransmission(new_keyboard_iic_address);
     device_detected = !Wire1.endTransmission();
     if (device_detected)
     {
         get_buffer(new_keyboard_iic_address);
-        if (iic_buffer[keyboard_iic_length - 1] != new_keyboard_crc)
+        if (iic_buffer[keyboard_iic_length - 1] == new_keyboard_crc)
         {
-            keyboard_type = keyboard_type & ~new_keyboard_old_program;
-            new_keyboard_old_program_flag = false;
+            keyboard_address_2_slot = new_keyboard_old_program;
 #if debug
-            debug_serial.println("New keyboard with old program CRC error");
+            debug_serial.println("New keyboard with old program detected at new keyboard address");
 #endif
         }
-        else
+        else if (iic_buffer[keyboard_iic_length - 1] == new_keyboard_with_new_program_crc)
         {
-            keyboard_type = keyboard_type | new_keyboard_old_program;
-            new_keyboard_old_program_flag = true;
+            keyboard_address_2_slot = new_keyboard_new_program;
 #if debug
-            debug_serial.println("New keyboard with old program detected");
+            debug_serial.println("New keyboard with new program detected at new keyboard address");
 #endif
         }
-    }
-    else
-    {
+        else if (iic_buffer[keyboard_iic_length - 1] == old_keyboard_crc)
+        {
+            keyboard_address_2_slot = old_keyboard;
 #if debug
-        debug_serial.println("No new keyboard with old program detected");
+            debug_serial.println("Old keyboard detected at new keyboard address");
 #endif
+        }
     }
     Wire1.beginTransmission(new_keyboard_with_new_program_iic_address);
     device_detected = !Wire1.endTransmission();
     if (device_detected)
     {
         get_buffer(new_keyboard_with_new_program_iic_address);
-        if (iic_buffer[keyboard_iic_length - 1] != new_keyboard_with_new_program_crc)
+        if (iic_buffer[keyboard_iic_length - 1] == new_keyboard_crc)
         {
-            keyboard_type = keyboard_type & ~new_keyboard_new_program;
-            new_keyboard_new_program_flag = false;
+            keyboard_address_3_slot = new_keyboard_old_program;
 #if debug
-            debug_serial.println("New keyboard with new program CRC error");
+            debug_serial.println("New keyboard with old program detected at new keyboard with new program address");
 #endif
         }
-        else
+        else if (iic_buffer[keyboard_iic_length - 1] == new_keyboard_with_new_program_crc)
         {
-            keyboard_type = keyboard_type | new_keyboard_new_program;
-            new_keyboard_new_program_flag = true;
+            keyboard_address_3_slot = new_keyboard_new_program;
 #if debug
-            debug_serial.println("New keyboard with new program detected");
+            debug_serial.println("New keyboard with new program detected at new keyboard with new program address");
 #endif
         }
+        else if (iic_buffer[keyboard_iic_length - 1] == old_keyboard_crc)
+        {
+            keyboard_address_3_slot = old_keyboard;
+#if debug
+            debug_serial.println("Old keyboard detected at new keyboard with new program address");
+#endif
+        }
+    }
+#if debug
+    debug_serial.println("Keyboard type detection complete.");
+    if (keyboard_address_1_slot == 0 && keyboard_address_2_slot == 0 && keyboard_address_3_slot == 0)
+    {
+        debug_serial.println("No keyboard detected on any address.");
     }
     else
     {
-#if debug
-        debug_serial.println("No new keyboard with new program detected");
-#endif
+        if (keyboard_address_1_slot != 0)
+        {
+            debug_serial.print("Keyboard detected at address 1 slot: ");
+            debug_serial.println(keyboard_address_1_slot);
+        }
+        if (keyboard_address_2_slot != 0)
+        {
+            debug_serial.print("Keyboard detected at address 2 slot: ");
+            debug_serial.println(keyboard_address_2_slot);
+        }
+        if (keyboard_address_3_slot != 0)
+        {
+            debug_serial.print("Keyboard detected at address 3 slot: ");
+            debug_serial.println(keyboard_address_3_slot);
+        }
     }
-    if (!old_keyboard_flag && !new_keyboard_old_program_flag && !new_keyboard_new_program_flag)
-    {
-        keyboard_type = no_keyboard;
-#if debug
-        debug_serial.println("No keyboard detected");
-        delay(1000);
+    debug_serial.println("Keyboard type detection finished.");
+    debug_serial.println("--------------------------------------------------");
 #endif
-    }
-    system_status.keyboard_type = keyboard_type;
-    return keyboard_type;
+
+    return 0;
 }
+
 uint8_t IIC_Keyboard::routine()
 {
 #if debug
     debug_serial.println("IIC_Keyboard routine start");
 #endif
     read_serial();
-    if (keyboard_type)
+    if (keyboard_address_1_slot)
     {
-        if (old_keyboard_flag)
+        if (keyboard_address_1_slot == old_keyboard)
         {
-#if debug
-            debug_serial.println("running old keyboard routine");
-#endif
             if (get_buffer(old_keyboard_iic_address))
             {
                 old_keyboard_routine();
-                for (int i = 0; i < keyboard_iic_length; i++)
-                {
-                    iic_buffer_old_keyboard_last_time[i] = iic_buffer[i];
-                }
+            }
+            else
+            {
+#if debug
+                debug_serial.println("Failed to get buffer from old keyboard at address 1 slot");
+#endif
+                keyboard_address_1_slot = 0;
             }
         }
-        else
+        else if (keyboard_address_1_slot == new_keyboard_old_program)
         {
-#if debug
-            debug_serial.println("No old keyboard detected, skipping old keyboard routine");
-#endif
-        }
-        if (new_keyboard_old_program_flag)
-        {
-#if debug
-            debug_serial.println("running new keyboard with old program routine");
-#endif
-            if (get_buffer(new_keyboard_iic_address))
+            if (get_buffer(old_keyboard_iic_address))
             {
                 new_keyboard_routine();
-                for (int i = 0; i < keyboard_iic_length; i++)
-                {
-                    iic_buffer_new_keyboard_last_time[i] = iic_buffer[i];
-                }
+            }
+            else
+            {
+#if debug
+                debug_serial.println("Failed to get buffer from new keyboard with old program at address 1 slot");
+#endif
+                keyboard_address_1_slot = 0;
             }
         }
-        else
+        else if (keyboard_address_1_slot == new_keyboard_new_program)
         {
-#if debug
-            debug_serial.println("No new keyboard with old program detected, skipping new keyboard with old program routine");
-#endif
-        }
-        if (new_keyboard_new_program_flag)
-        {
-#if debug
-            debug_serial.println("running new keyboard with new program routine");
-#endif
             if (digitalRead(keyboard_int))
             {
 #if debug
                 debug_serial.println("Keyboard interrupt detected, running new keyboard with new program routine");
 #endif
-                if (get_buffer(new_keyboard_with_new_program_iic_address))
+                if (get_buffer(old_keyboard_iic_address))
                 {
                     new_keyboard_routine();
                     for (int i = 0; i < keyboard_iic_length; i++)
                     {
                         iic_buffer_new_keyboard_last_time[i] = iic_buffer[i];
                     }
+                }
+                else
+                {
+#if debug
+                    debug_serial.println("Failed to get buffer from new keyboard with new program at address 1 slot");
+#endif
+                    keyboard_address_1_slot = 0;
                 }
             }
             else
@@ -364,25 +372,161 @@ uint8_t IIC_Keyboard::routine()
 #endif
             }
         }
+        else
+        {
 #if debug
-        debug_serial.println("IIC_Keyboard routine end");
+            debug_serial.println("Unknown keyboard type detected at address 1 slot, skipping routine");
 #endif
-        return true;
+            keyboard_address_1_slot = 0;
+        }
     }
-    else
+   if (keyboard_address_2_slot)
     {
+        if (keyboard_address_2_slot == old_keyboard)
+        {
+            if (get_buffer(new_keyboard_iic_address))
+            {
+                old_keyboard_routine();
+            }
+            else
+            {
 #if debug
-        debug_serial.println("No keyboard detected, skipping IIC_Keyboard routine");
+                debug_serial.println("Failed to get buffer from old keyboard at address 2 slot");
 #endif
-        find_keyboard_type();
-        return false;
+                keyboard_address_2_slot = 0;
+            }
+        }
+        else if (keyboard_address_2_slot == new_keyboard_old_program)
+        {
+            if (get_buffer(new_keyboard_iic_address))
+            {
+                new_keyboard_routine();
+            }
+            else
+            {
+#if debug
+                debug_serial.println("Failed to get buffer from new keyboard with old program at address 2 slot");
+#endif
+                keyboard_address_2_slot = 0;
+            }
+        }
+        else if (keyboard_address_2_slot == new_keyboard_new_program)
+        {
+            if (digitalRead(keyboard_int))
+            {
+#if debug
+                debug_serial.println("Keyboard interrupt detected, running new keyboard with new program routine");
+#endif
+                if (get_buffer(new_keyboard_iic_address))
+                {
+                    new_keyboard_routine();
+                    for (int i = 0; i < keyboard_iic_length; i++)
+                    {
+                        iic_buffer_new_keyboard_last_time[i] = iic_buffer[i];
+                    }
+                }
+                else
+                {
+#if debug
+                    debug_serial.println("Failed to get buffer from new keyboard with new program at address 2 slot");
+#endif
+                    keyboard_address_2_slot = 0;
+                }
+            }
+        }
+        else
+        {
+#if debug
+            debug_serial.println("No keyboard interrupt detected, skipping new keyboard with new program routine");
+#endif
+            keyboard_address_2_slot = 0;
+        }
     }
-    return false;
+    if (keyboard_address_3_slot)
+    {
+        if (keyboard_address_3_slot == old_keyboard)
+        {
+            if (get_buffer(new_keyboard_with_new_program_iic_address))
+            {
+                old_keyboard_routine();
+            }
+            else
+            {
+#if debug
+                debug_serial.println("Failed to get buffer from old keyboard at address 3 slot");
+#endif
+                keyboard_address_3_slot = 0;
+            }
+        }
+        else if (keyboard_address_3_slot == new_keyboard_old_program)
+        {
+            if (get_buffer(new_keyboard_with_new_program_iic_address))
+            {
+                new_keyboard_routine();
+            }
+            else
+            {
+#if debug
+                debug_serial.println("Failed to get buffer from new keyboard with old program at address 3 slot");
+#endif
+                keyboard_address_3_slot = 0;
+            }
+        }
+        else if (keyboard_address_3_slot == new_keyboard_new_program)
+        {
+            if (digitalRead(keyboard_int))
+            {
+#if debug
+                debug_serial.println("Keyboard interrupt detected, running new keyboard with new program routine");
+#endif
+                if (get_buffer(new_keyboard_with_new_program_iic_address))
+                {
+                    new_keyboard_routine();
+                }
+                else
+                {
+#if debug
+                    debug_serial.println("Failed to get buffer from new keyboard with new program at address 3 slot");
+#endif
+                    keyboard_address_3_slot = 0;
+                }
+            }
+        }
+        else
+        {
+#if debug
+            debug_serial.println("Unknown keyboard type detected at address 3 slot, skipping routine");
+#endif
+            keyboard_address_3_slot = 0;
+        }
+    }
+    if(keyboard_address_1_slot == 0 && keyboard_address_2_slot == 0 && keyboard_address_3_slot == 0)
+    {
+        find_keyboard_type();
+    }
+#if debug
+    debug_serial.println("IIC_Keyboard routine end");
+    // delay(5000);
+#endif
+    return true;
 }
+
 bool IIC_Keyboard::get_buffer(uint8_t address)
 {
 #if debug
-    debug_serial.print("Getting IIC buffer from address 0x");
+    debug_serial.print("Getting IIC buffer from address ");
+    if (address == old_keyboard_iic_address)
+    {
+        debug_serial.print("old_keyboard_iic_address: ");
+    }
+    else if (address == new_keyboard_iic_address)
+    {
+        debug_serial.print("new_keyboard_iic_address: ");
+    }
+    else if (address == new_keyboard_with_new_program_iic_address)
+    {
+        debug_serial.print("new_keyboard_with_new_program_iic_address: ");
+    }
     debug_serial.println(address, HEX);
 #endif
     uint8_t iic_length = Wire1.requestFrom(address, keyboard_iic_length);
@@ -433,37 +577,15 @@ bool IIC_Keyboard::get_buffer(uint8_t address)
     }
     debug_serial.println();
 #endif
-    if (address == old_keyboard_iic_address)
+    if (iic_buffer[keyboard_iic_length - 1] == old_keyboard_crc || iic_buffer[keyboard_iic_length - 1] == new_keyboard_crc || iic_buffer[keyboard_iic_length - 1] == new_keyboard_with_new_program_crc)
     {
-        if (iic_buffer[keyboard_iic_length - 1] != old_keyboard_crc)
-        {
-#if debug
-            debug_serial.println("Old keyboard CRC error in get_buffer");
-#endif
-            return false;
-        }
+        #if debug
+        debug_serial.println("IIC buffer CRC check passed");
+        #endif
+        return true;
     }
-    else if (address == new_keyboard_iic_address)
-    {
-        if (iic_buffer[keyboard_iic_length - 1] != new_keyboard_crc)
-        {
-#if debug
-            debug_serial.println("New keyboard CRC error in get_buffer");
-#endif
-            return false;
-        }
-    }
-    else if (address == new_keyboard_with_new_program_iic_address)
-    {
-        if (iic_buffer[keyboard_iic_length - 1] != new_keyboard_with_new_program_crc)
-        {
-#if debug
-            debug_serial.println("New keyboard with new program CRC error in get_buffer");
-#endif
-            return false;
-        }
-    }
-    return true;
+
+    return false;
 }
 uint8_t IIC_Keyboard::old_keyboard_routine()
 {
@@ -624,8 +746,8 @@ uint8_t IIC_Keyboard::old_keyboard_routine()
                             {
                                 Keyboard.release(old_keyboard_key[key_index].key_value);
                                 system_status.last_key_value = old_keyboard_key[key_index].key_value;
-                                system_status.last_key_index=key_index;
-                                 if (old_keyboard_key[key_index].set_function)
+                                system_status.last_key_index = key_index;
+                                if (old_keyboard_key[key_index].set_function)
                                 {
                                     system_status.ssd1306_set_instruction = old_keyboard_key[key_index].set_function;
                                 }
